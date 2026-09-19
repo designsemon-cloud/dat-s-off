@@ -1,0 +1,47 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+.output
+.vinxi
+.tanstack/**
+.nitro
+*.local
+
+# Environment variables — contain secrets, never commit
+.env
+.env.local
+.env.*.local
+
+# Wrangler / Cloudflare
+.wrangler/
+.dev.vars
+
+# Vercel (project link + build output are machine/CI-generated)
+.vercel
+
+# Vite dependency cache
+.vite
+
+# Personal files not part of the project
+/Sayak_Das_Gupta_CV.pdf
+/VocalMusic_QuestionPaper_3.pdf
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
