@@ -2,23 +2,29 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark, .dark *));
 
 /*
- * UXCC Design System — Vibrant Dark UI
- * Inspired by emergent.ai / aura.ai / vercel.io
- * All colors in oklch. Semantic tokens only — never hardcode in components.
+ * Dats Off. design system v2 — based on design-system/Design system.md
+ * (adapted from the IdeaApe DESIGN.md). Light first; `.dark` on <html> is
+ * the derived dark theme. Greys carry the hierarchy, orange is the only
+ * accent. Components reference these tokens, never raw values.
  */
 
 @theme inline {
-  --font-sans: "Space Grotesk", -apple-system, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  /* Typography — Forum (display serif, one weight) over a system-ui body,
+     per the two-font system. */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Forum", Georgia, serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
+  /* Shapes — pinned to the DS set: 12 · 14 · 16 · 18 · 24 · full */
+  --radius-sm: 12px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-3xl: 24px;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -32,114 +38,207 @@
   --color-popover-foreground: var(--popover-foreground);
 
   --color-primary: var(--primary);
+  --color-learn: var(--learn);
+  /* Stage: the landing films and "What it catches" scenes (themed). */
+  --color-st: var(--st-fg);
+  --color-st-on: var(--st-on);
+  --color-st-bg: var(--st-bg);
+  --color-st-card: var(--st-card);
+  --color-st-tile: var(--st-tile);
+  --color-st-chrome: var(--st-chrome);
   --color-primary-foreground: var(--primary-foreground);
-  --color-primary-glow: var(--primary-glow);
+  --color-primary-glow: var(--primary-hover);
+  --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-cyan: var(--cyan);
+  --color-accent: var(--primary);
+  --color-accent-foreground: var(--primary-foreground);
 
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-text-tertiary: var(--text-tertiary);
 
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive: var(--primary);
+  --color-destructive-foreground: var(--primary-foreground);
 
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
+  --color-input: var(--border);
+  --color-ring: var(--primary);
 
   --color-severity-high: var(--severity-high);
   --color-severity-medium: var(--severity-medium);
   --color-severity-low: var(--severity-low);
 
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
+  --color-chart-1: var(--primary);
+  --color-chart-2: var(--muted-foreground);
+  --color-chart-3: var(--text-tertiary);
+  --color-chart-4: var(--border-strong);
+  --color-chart-5: var(--primary-hover);
 
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar: var(--bg-secondary);
+  --color-sidebar-foreground: var(--foreground);
+  --color-sidebar-primary: var(--primary);
+  --color-sidebar-primary-foreground: var(--primary-foreground);
+  --color-sidebar-accent: var(--bg-elevated);
+  --color-sidebar-accent-foreground: var(--foreground);
+  --color-sidebar-border: var(--border);
+  --color-sidebar-ring: var(--primary);
 
-  --shadow-glow: 0 0 32px -10px oklch(0.75 0.15 60 / 0.35);
-  --shadow-glow-lg: 0 0 60px -14px oklch(0.75 0.15 60 / 0.4);
-  --shadow-elegant: 0 20px 60px -20px oklch(0 0 0 / 0.6);
+  /* Elevation */
+  --shadow-sm: var(--elevation-sm);
+  --shadow-elegant: var(--elevation-lg);
+  --shadow-glow: var(--elevation-sm);
+
+  /* Engraved illustrations are alpha masks painted in this color. */
+  --color-ink: var(--ink);
 }
 
+/* ── Light (source theme) ─────────────────────────────────────────────── */
 :root {
-  --radius: 0.75rem;
+  --radius: 14px;
 
-  /* Backgrounds — Dark grey */
-  --background: oklch(0.12 0 0);
-  --bg-secondary: oklch(0.15 0 0);
-  --bg-tertiary: oklch(0.19 0 0);
-  --bg-elevated: oklch(0.23 0 0);
+  --background: #f3f3f5; /* color-8 */
+  --bg-secondary: #f9f9fa; /* color-9 */
+  --bg-tertiary: #ffffff; /* color-10 — cards */
+  --bg-elevated: #f3f3f5; /* color-8 — hover / selected inside cards */
 
-  --foreground: oklch(0.985 0 0);
-  --muted-foreground: oklch(0.74 0 0);
-  --text-tertiary: oklch(0.56 0 0);
+  --foreground: #1e2022; /* color-1 */
+  --muted-foreground: #5b616e; /* color-2 */
+  --text-tertiary: #6b7280; /* color-3 */
 
-  --card: oklch(0.19 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.23 0 0);
-  --popover-foreground: oklch(0.985 0 0);
+  --card: #ffffff;
+  --card-foreground: #1e2022;
+  --popover: #ffffff;
+  --popover-foreground: #1e2022;
 
-  /* Primary — Orange */
-  --primary: oklch(0.70 0.20 45);                /* Vibrant Orange */
-  --primary-foreground: oklch(0.15 0.03 45);
-  --primary-glow: oklch(0.75 0.20 50);
-  --secondary: oklch(0.26 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --accent: oklch(0.70 0.20 45);
-  --accent-foreground: oklch(0.15 0.03 45);
-  --cyan: oklch(0.78 0.13 230);
+  --primary: #ea580c; /* color-4 */
+  --primary-hover: #ff6c0a; /* color-5 */
+  /* Learning accent: links to articles and videos only (patterns/learning.md).
+     Cool, so it never reads as the orange primary. 6.4:1 on --bg-secondary. */
+  --learn: #4f46e5;
+  /* Stage tokens: the landing films (Why Dats Off.) and the "What it
+     catches" scenes. --st-fg is the scene's ink (text, lines, filled
+     buttons); --st-on is text on it. Light: a bright studio. */
+  --st-bg: #f2f2f4;
+  --st-glow: #ffffff;
+  --st-fg: #17181b;
+  --st-on: #ffffff;
+  --st-dim: #d4d4d9;
+  --st-card: #ffffff;
+  --st-tile: #ffffff;
+  --st-chrome: #e7e7ea;
+  --st-shadow: rgba(15, 17, 20, 0.16);
+  --st-vignette: rgba(15, 17, 20, 0.05);
+  --st-rim: #d6d6db;
+  --st-gap: #fbfbfc;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f3f5;
+  --secondary-foreground: #1e2022;
+  --muted: #f3f3f5;
 
-  --muted: oklch(0.23 0 0);
-  --destructive: oklch(0.65 0.24 27);
-  --destructive-foreground: oklch(0.985 0 0);
+  --border: #d8dbdf; /* color-7 */
+  --border-strong: #cfd2d6; /* color-6 */
 
-  --border: oklch(0.27 0 0);
-  --border-strong: oklch(0.36 0 0);
-  --input: oklch(0.23 0 0);
-  --ring: oklch(0.70 0.20 45);
+  /* Severity is carried by one accent + grey weight, not by hue. */
+  --severity-high: #ea580c;
+  --severity-medium: #5b616e;
+  --severity-low: #cfd2d6;
 
-  --severity-high: oklch(0.68 0.22 27);
-  --severity-medium: oklch(0.70 0.20 45);
-  --severity-low: oklch(0.74 0.16 162);
+  --elevation-sm: 0 0 0 1px rgba(227, 226, 224, 0.5), 0 2px 4px 0 rgba(0, 0, 0, 0.04);
+  --elevation-lg: 0 0 0 1px rgba(227, 226, 224, 0.6), 0 16px 40px -12px rgba(30, 32, 34, 0.14);
 
-  --chart-1: oklch(0.70 0.20 45);
-  --chart-2: oklch(0.75 0.20 50);
-  --chart-3: oklch(0.74 0.13 230);
-  --chart-4: oklch(0.74 0.16 162);
-  --chart-5: oklch(0.78 0.16 60);
+  --grain-opacity: 0.075;
+  --card-grain-opacity: 0.16; /* stronger inside textured cards */
+  --mock-glow: color-mix(in srgb, #ea580c 9%, transparent);
 
-  --sidebar: oklch(0.15 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.70 0.20 45);
-  --sidebar-primary-foreground: oklch(0.12 0.03 45);
-  --sidebar-accent: oklch(0.23 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.27 0 0);
-  --sidebar-ring: oklch(0.70 0.20 45);
+  /* Textured card: color-9 paper, a color-10 hairline edge, grain on top. */
+  /* Paper noise: dark specks on the light theme… */
+  --grain-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 
-  --gradient-primary: linear-gradient(135deg, oklch(0.70 0.20 45) 0%, oklch(0.75 0.20 50) 100%);
-  --gradient-secondary: linear-gradient(135deg, oklch(0.74 0.13 230) 0%, oklch(0.70 0.20 45) 100%);
-  --gradient-text: linear-gradient(135deg, oklch(0.985 0 0) 0%, oklch(0.75 0.20 50) 100%);
-  --gradient-mesh:
-    radial-gradient(at 20% 10%, oklch(0.70 0.20 45 / 0.10) 0px, transparent 50%),
-    radial-gradient(at 80% 0%, oklch(0.75 0.20 50 / 0.08) 0px, transparent 50%),
-    radial-gradient(at 0% 80%, oklch(0.74 0.13 230 / 0.08) 0px, transparent 50%),
-    radial-gradient(at 90% 90%, oklch(0.70 0.20 45 / 0.06) 0px, transparent 50%);
+  --surface-card: #f9f9fa;
+  --surface-edge: rgba(17, 19, 24, 0.09);
+  --surface-highlight: rgba(255, 255, 255, 0.9);
+  --ink: #1e2022;
+
+  /* Footer wordmark: grey letters fading into the page, a white sheen. */
+  --gloss-top: #4b5058;
+  --gloss-mid: #1e2022;
+  --gloss-bottom: #9aa0a9;
+  --gloss-sheen: rgba(255, 255, 255, 0.55);
+  --gloss-reflect: rgba(255, 255, 255, 0.22);
+  /* Headings + logo: same gloss, but no fade, so text stays readable. */
+  --gloss-h-top: #5b616e;
+  --gloss-h-mid: #1e2022;
+  --gloss-h-bottom: #3a3e44;
+}
+
+/* ── Dark (derived) — same roles, inverted luminance ─────────────────── */
+:root.dark {
+  --background: #111214;
+  --bg-secondary: #16171a;
+  --bg-tertiary: #1c1d20;
+  --bg-elevated: #26282c;
+
+  --foreground: #f3f3f5;
+  --muted-foreground: #b6bac2;
+  --text-tertiary: #8e949e;
+
+  --card: #1c1d20;
+  --card-foreground: #f3f3f5;
+  --popover: #1c1d20;
+  --popover-foreground: #f3f3f5;
+
+  --primary: #ff6c0a;
+  --primary-hover: #ea580c;
+  --learn: #a3abff;
+  --st-bg: #0b0c0e;
+  --st-glow: #22242a;
+  --st-fg: #ffffff;
+  --st-on: #18181b;
+  --st-dim: #34363c;
+  --st-card: #f4f4f5;
+  --st-tile: #1b1c20;
+  --st-chrome: #1b1c20;
+  --st-shadow: rgba(0, 0, 0, 0.7);
+  --st-vignette: rgba(0, 0, 0, 0.55);
+  --st-rim: #45464c;
+  --st-gap: #0b0b0c;
+  --primary-foreground: #ffffff;
+  --secondary: #26282c;
+  --secondary-foreground: #f3f3f5;
+  --muted: #26282c;
+
+  --border: #2e3035;
+  --border-strong: #3d4047;
+
+  --severity-high: #ff6c0a;
+  --severity-medium: #b6bac2;
+  --severity-low: #3d4047;
+
+  --elevation-sm: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 2px 4px 0 rgba(0, 0, 0, 0.3);
+  --elevation-lg: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 16px 40px -12px rgba(0, 0, 0, 0.6);
+
+  --grain-opacity: 0.07;
+  --card-grain-opacity: 0.11;
+  --mock-glow: color-mix(in srgb, #ff6c0a 5%, transparent);
+
+  /* …light specks on the dark theme (dark noise vanishes on dark paper). */
+  --grain-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+
+  --surface-card: #16171a;
+  --surface-edge: rgba(255, 255, 255, 0.07);
+  --surface-highlight: rgba(255, 255, 255, 0.04);
+  --ink: #8e949e;
+  --gloss-top: #b6bac2;
+  --gloss-mid: #6b7079;
+  --gloss-bottom: #2f3237;
+  --gloss-sheen: rgba(255, 255, 255, 0.85);
+  --gloss-reflect: rgba(255, 255, 255, 0.18);
+  --gloss-h-top: #ffffff;
+  --gloss-h-mid: #d6d9de;
+  --gloss-h-bottom: #9aa0a9;
+  color-scheme: dark;
 }
 
 @layer base {
@@ -150,10 +249,10 @@
   :focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
-    border-radius: 4px;
   }
 
-  html, body {
+  html,
+  body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
@@ -162,113 +261,534 @@
   }
 
   ::selection {
-    background-color: oklch(0.78 0.14 60 / 0.35);
+    background-color: color-mix(in srgb, var(--primary) 22%, transparent);
     color: var(--color-foreground);
   }
 
-  /* Custom scrollbar */
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
   ::-webkit-scrollbar-thumb {
     background: var(--border-strong);
-    border-radius: 6px;
-    border: 2px solid var(--bg-secondary);
+    border-radius: 12px;
+    border: 2px solid var(--background);
   }
-  ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 }
 
 @layer utilities {
-  .bg-mesh { background-image: var(--gradient-mesh); }
-  .bg-gradient-primary { background-image: var(--gradient-primary); }
-  .bg-gradient-secondary { background-image: var(--gradient-secondary); }
-  .text-gradient {
-    background-image: var(--gradient-text);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-  }
-  .text-gradient-primary {
-    background-image: var(--gradient-primary);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-  }
-  .shadow-glow { box-shadow: var(--shadow-glow); }
-  .shadow-glow-lg { box-shadow: var(--shadow-glow-lg); }
-  .shadow-elegant { box-shadow: var(--shadow-elegant); }
-  .font-mono { font-family: var(--font-mono); }
-
-  /* Dot grid pattern */
-  .bg-dot-grid {
-    background-image: radial-gradient(circle, oklch(0.32 0.016 280) 1px, transparent 1px);
-    background-size: 24px 24px;
+  /* One icon weight across the product: Lucide at a 1.75 stroke (the 2px
+     default reads heavy at 14–16px). Covers the /app shell and the account
+     modals; solid glyphs (strokeWidth 0, e.g. a filled play) are left alone. */
+  :where([data-app-shell], [data-ui-icons]) svg.lucide:not([stroke-width="0"]) {
+    stroke-width: 1.75;
   }
 
-  /* Animated gradient border */
-  .border-glow {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+  .shadow-elegant {
+    box-shadow: var(--elevation-lg);
+  }
+
+  /* Paper grain, as on the reference site — a fixed noise layer, neutral in
+     both themes. */
+  .bg-grain {
     position: relative;
+    isolation: isolate;
   }
-  .border-glow::before {
+  .bg-grain::before {
     content: "";
     position: absolute;
-    inset: -1px;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image: var(--grain-image);
     border-radius: inherit;
+  }
+
+  /* Textured card surface (landing). Pair with .bg-grain for the paper noise. */
+  .surface-card {
+    background-color: var(--surface-card);
+    box-shadow:
+      inset 0 1px 0 var(--surface-highlight),
+      inset 0 0 0 1px var(--surface-edge),
+      var(--elevation-sm);
+  }
+
+  /* Cards carry more visible grain than the page behind them. */
+  .surface-card.bg-grain::before,
+  .bg-grain.card-grain::before {
+    opacity: var(--card-grain-opacity);
+  }
+
+  /* Liquid glass: the landing nav once the page scrolls. A clear, blurred and
+     saturated fill; a specular rim drawn as a masked gradient border (bright
+     at the top-left, fading round the edge); a soft lift. In Chromium
+     (html.lg-refract, components/landing/LiquidGlass.tsx) the backdrop is
+     also refracted at the edges with a chromatic fringe, as on iOS. */
+  .liquid-glass {
+    isolation: isolate;
+    --glass-fill: rgba(255, 255, 255, 0.5);
+    --glass-top: rgba(255, 255, 255, 0.85);
+    --glass-bottom: rgba(255, 255, 255, 0.25);
+    --glass-drop: rgba(15, 17, 20, 0.14);
+    --glass-rim: rgba(255, 255, 255, 0.95);
+    --glass-rim-dim: rgba(15, 17, 20, 0.07);
+    position: relative;
+    background-color: var(--glass-fill);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(180%);
+    box-shadow:
+      inset 0 1px 0 var(--glass-top),
+      inset 0 -1px 0 var(--glass-bottom),
+      0 8px 24px -14px var(--glass-drop);
+  }
+  .dark .liquid-glass {
+    --glass-fill: rgba(28, 29, 32, 0.45);
+    --glass-top: rgba(255, 255, 255, 0.1);
+    --glass-bottom: rgba(255, 255, 255, 0.03);
+    --glass-drop: rgba(0, 0, 0, 0.55);
+    --glass-rim: rgba(255, 255, 255, 0.24);
+    --glass-rim-dim: rgba(255, 255, 255, 0.04);
+  }
+  /* Specular sheen: light pooled at the top-left, as on curved glass. */
+  .liquid-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 140% at 0% 0%, var(--glass-sheen), transparent 45%),
+      radial-gradient(80% 120% at 100% 100%, var(--glass-sheen-dim), transparent 50%);
+  }
+  .liquid-glass {
+    --glass-sheen: rgba(255, 255, 255, 0.45);
+    --glass-sheen-dim: rgba(255, 255, 255, 0.12);
+  }
+  .dark .liquid-glass {
+    --glass-sheen: rgba(255, 255, 255, 0.09);
+    --glass-sheen-dim: rgba(255, 255, 255, 0.03);
+  }
+  /* Chromium: refraction + a lighter blur, so the bending shows through. */
+  .lg-refract .liquid-glass {
+    --glass-fill: rgba(255, 255, 255, 0.3);
+    -webkit-backdrop-filter: url(#liquid-glass) blur(5px) saturate(185%) brightness(1.04);
+    backdrop-filter: url(#liquid-glass) blur(5px) saturate(185%) brightness(1.04);
+  }
+  .lg-refract.dark .liquid-glass,
+  .dark.lg-refract .liquid-glass {
+    --glass-fill: rgba(28, 29, 32, 0.32);
+    -webkit-backdrop-filter: url(#liquid-glass) blur(5px) saturate(170%) brightness(0.96);
+    backdrop-filter: url(#liquid-glass) blur(5px) saturate(170%) brightness(0.96);
+  }
+  .liquid-glass::after {
+    content: "";
+    position: absolute;
+    inset: 0;
     padding: 1px;
-    background: var(--gradient-primary);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      135deg,
+      var(--glass-rim),
+      var(--glass-rim-dim) 38%,
+      var(--glass-rim-dim) 62%,
+      var(--glass-rim)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
-    opacity: 0.6;
+  }
+
+  /* The same card grain as a child layer, for a piece that sits on top of an
+     image but is cut from the card (the Learn cards' notched label). */
+  .card-grain-layer {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     pointer-events: none;
+    border-radius: inherit;
+    opacity: var(--card-grain-opacity);
+    background-image: var(--grain-image);
+  }
+
+  /* Engraved scenes (Scenery.tsx): the art is a mask over a bg-ink fill.
+     Light paper uses the ink-stroke mask; dark mode swaps in the
+     scratchboard mask so light falls the right way. */
+  .ink-art {
+    -webkit-mask-image: var(--art-light), var(--art-fade);
+    mask-image: var(--art-light), var(--art-fade);
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+  .dark .ink-art {
+    -webkit-mask-image: var(--art-dark), var(--art-fade);
+    mask-image: var(--art-dark), var(--art-fade);
+  }
+
+  /* Cosmic button border (primary CTAs): a fixed-width border (the
+     button's padding) filled with close orange shades. A softer, lighter
+     band drifts along it — colour only, the width never changes. The tile
+     is 200% wide and repeats, so moving it by -200% loops seamlessly. */
+  @keyframes cosmic-shimmer {
+    from {
+      background-position: 0% 50%;
+    }
+    to {
+      background-position: -200% 50%;
+    }
+  }
+  .cosmic-border {
+    background-image: linear-gradient(
+      90deg,
+      #ea580c 0%,
+      #ec631b 28%,
+      #f39256 50%,
+      #ec631b 72%,
+      #ea580c 100%
+    );
+    background-size: 200% 100%;
+    background-repeat: repeat-x;
+    animation: cosmic-shimmer 6s linear infinite;
+  }
+
+  /* Learning marquee (components/learn/LearnMedia.tsx → Marquee): a track
+     holding the items twice slides by one copy, so the loop is seamless.
+     Duration is set from the copy's width, for one slow, constant speed. */
+  @keyframes learn-marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  .learn-marquee-track {
+    animation: learn-marquee var(--marquee-duration, 80s) linear infinite;
+  }
+  .learn-marquee[data-reverse] .learn-marquee-track {
+    animation-direction: reverse;
+  }
+  .learn-marquee[data-paused] .learn-marquee-track {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .learn-marquee-track {
+      animation: none;
+    }
+  }
+
+  /* Display serif: Forum ships one weight, so never fake-bold it; letter
+     spacing is always 0 and lines are compact. */
+  .font-display {
+    font-synthesis-weight: none;
+    letter-spacing: 0 !important;
+    line-height: 1.05 !important;
+  }
+
+  /* Glossy heading text (section titles, logo): a top-to-bottom grey body
+     with a soft reflection and a sheen band. GlossText scrolls the sheen
+     (first layer) from 100% (off left) to 0% (off right). */
+  .gloss-heading {
+    color: transparent;
+    background-image:
+      linear-gradient(100deg, transparent 42%, var(--gloss-sheen) 50%, transparent 58%),
+      linear-gradient(to bottom, var(--gloss-reflect) 0%, transparent 50%),
+      linear-gradient(
+        to bottom,
+        var(--gloss-h-top) 0%,
+        var(--gloss-h-mid) 55%,
+        var(--gloss-h-bottom) 100%
+      );
+    background-size:
+      300% 100%,
+      100% 100%,
+      100% 100%;
+    background-repeat: no-repeat;
+    background-position:
+      100% 0,
+      0 0,
+      0 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  /* Logo: the sheen sweeps across on hover. */
+  .gloss-hover {
+    transition: background-position 0.9s ease;
+  }
+  .group:hover .gloss-hover,
+  .gloss-hover:hover {
+    background-position:
+      0% 0,
+      0 0,
+      0 0;
+  }
+
+  /* Glossy clipped text (footer wordmark). Animate background-position's
+     first layer to sweep the sheen: 100% = off the left edge, ~45% = rest. */
+  .gloss-text {
+    color: transparent;
+    background-image:
+      linear-gradient(100deg, transparent 42%, var(--gloss-sheen) 50%, transparent 58%),
+      linear-gradient(to bottom, var(--gloss-reflect) 0%, transparent 42%),
+      linear-gradient(
+        to bottom,
+        var(--gloss-top) 0%,
+        var(--gloss-mid) 38%,
+        var(--gloss-bottom) 72%,
+        transparent 100%
+      );
+    background-size:
+      300% 100%,
+      100% 100%,
+      100% 100%;
+    background-repeat: no-repeat;
+    background-position:
+      45% 0,
+      0 0,
+      0 0;
+    -webkit-background-clip: text;
+    background-clip: text;
   }
 
   @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
   .animate-shimmer {
     background: linear-gradient(
       90deg,
       transparent,
-      oklch(0.985 0 0 / 0.08),
+      color-mix(in srgb, var(--foreground) 6%, transparent),
       transparent
     );
     background-size: 200% 100%;
     animation: shimmer 2s linear infinite;
   }
 
-  @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 20px -5px oklch(0.78 0.14 60 / 0.4); }
-    50% { box-shadow: 0 0 36px -5px oklch(0.78 0.14 60 / 0.7); }
-  }
-  .animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
-
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-8px); }
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
   }
-  .animate-float { animation: float 6s ease-in-out infinite; }
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
 
-  /* Scanning beam for AnalyzingState — runs on compositor, zero JS cost */
+  /* Scanning beam over a screenshot being analyzed — compositor only. */
   @keyframes scan-beam {
-    from { transform: translateY(-100%); }
-    to { transform: translateY(500%); }
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(500%);
+    }
   }
-  .animate-scan { animation: scan-beam 2s linear infinite; }
+  .animate-scan {
+    animation: scan-beam 2s linear infinite;
+  }
 
-  /* Pulsing status dot — pure CSS, no framer-motion */
   @keyframes pulse-dot {
-    0%, 100% { opacity: 0.35; }
-    50% { opacity: 1; }
+    0%,
+    100% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 1;
+    }
   }
-  .animate-pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+  .animate-pulse-dot {
+    animation: pulse-dot 1.2s ease-in-out infinite;
+  }
 
-  @keyframes gradient-shift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+  /* Glass icon (uxcc/GlassIcon.tsx): a small app-icon tile of clear liquid
+     glass with a chromatic rim, like a favicon. Used for the "Rate this
+     review" pill. The rim's colours turn slowly; reduced motion holds them. */
+  @property --gi-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
   }
-  .animate-gradient {
-    background-size: 200% 200%;
-    animation: gradient-shift 8s ease infinite;
+  @keyframes gi-spin {
+    to {
+      --gi-angle: 360deg;
+    }
+  }
+  .glass-icon {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    color: var(--foreground);
+    background:
+      radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, 0.95), transparent 55%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.18));
+    -webkit-backdrop-filter: blur(8px) saturate(180%);
+    backdrop-filter: blur(8px) saturate(180%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -1px 2px rgba(15, 17, 20, 0.08),
+      0 4px 10px -4px rgba(15, 17, 20, 0.28);
+  }
+  .dark .glass-icon {
+    background:
+      radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, 0.24), transparent 55%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.3),
+      0 4px 10px -4px rgba(0, 0, 0, 0.7);
+  }
+  .glass-icon-round,
+  .glass-icon-round::after {
+    border-radius: 9999px;
+  }
+  /* The FAB is larger: a slightly thicker rim and a softer lift. */
+  .glass-icon-round::before {
+    padding: 1.5px;
+  }
+  .glass-icon-round {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -2px 4px rgba(15, 17, 20, 0.06),
+      0 10px 24px -10px rgba(15, 17, 20, 0.35);
+  }
+  .dark .glass-icon-round {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+      0 10px 24px -10px rgba(0, 0, 0, 0.8);
+  }
+  /* The rim: a conic ring of machined metal, copper and titanium. Burnt
+     copper, a champagne highlight, steel, a graphite shadow, platinum, then a
+     warm copper again, so it catches the light as it turns, like a bevelled
+     edge, and ties in with the orange brand. */
+  .glass-icon::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: conic-gradient(
+      from var(--gi-angle),
+      #c8692f 0deg,
+      #f6e3c3 55deg,
+      #8a93a6 120deg,
+      #2f343f 185deg,
+      #b7c0cf 250deg,
+      #e7a06a 310deg,
+      #c8692f 360deg
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.85;
+    animation: gi-spin 8s linear infinite;
+  }
+  /* A soft chromatic glow inside the glass, under the icon. */
+  .glass-icon::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    z-index: -1;
+    border-radius: 7px;
+    pointer-events: none;
+    background: conic-gradient(
+      from var(--gi-angle),
+      rgba(200, 105, 47, 0.32),
+      rgba(246, 227, 195, 0.3),
+      rgba(138, 147, 166, 0.22),
+      rgba(231, 160, 106, 0.3),
+      rgba(200, 105, 47, 0.32)
+    );
+    filter: blur(5px);
+    animation: gi-spin 8s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glass-icon::before,
+    .glass-icon::after {
+      animation: none;
+    }
+  }
+
+  /* "Why Dats Off." film subtitles: each line fades up as its scene starts. */
+  @keyframes why-caption {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+      filter: blur(3px);
+    }
+  }
+  .why-caption {
+    animation: why-caption 0.6s ease-out;
+  }
+
+  /* "What it catches" stages: a radar ping, and a path that flows. */
+  @keyframes catch-radar {
+    from {
+      transform: scale(0.6);
+      opacity: 0.7;
+    }
+    to {
+      transform: scale(2.8);
+      opacity: 0;
+    }
+  }
+  .catch-radar {
+    animation: catch-radar 2.1s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  }
+  @keyframes catch-dash {
+    to {
+      stroke-dashoffset: -18;
+    }
+  }
+  .catch-dash {
+    animation: catch-dash 0.9s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .why-caption,
+    .catch-radar,
+    .catch-dash {
+      animation: none;
+    }
+    .catch-radar {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float,
+    .animate-scan,
+    .animate-shimmer,
+    .cosmic-border {
+      animation: none;
+    }
   }
 }

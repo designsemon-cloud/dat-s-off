@@ -7,6 +7,7 @@ interface KVNamespace {
 interface CloudflareEnv {
   AUTH_STORE: KVNamespace;
   OPENAI_API_KEY: string;
+  GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
 }
 

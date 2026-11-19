@@ -5,17 +5,101 @@ export interface UXFix {
   title: string;
   severity: Severity;
   principle: string;
+  /** The learning catalog's key for `principle` (lib/learn.ts), or "other". */
+  principleKey?: string;
   problem: string;
   why: string;
   solution: string;
   code: string;
   language: string;
+  /** Ready-to-paste prompt for Cursor/v0/Lovable that fixes this specific issue. */
+  fixPrompt: string;
+  /**
+   * Where the issue sits on the screenshot, as 0–1 fractions of its width/height.
+   * Shown only once the locate pass has grounded it (`locator.status === "verified"`)
+   * or on hand-placed samples.
+   */
+  region?: IssueRegion | null;
+  /** What the locate pass found for this issue (lib/locate.ts). */
+  locator?: IssueLocator;
+  /** Where on the screen the issue is, in words ("account header, top right"). */
+  location?: string;
+  /** 2–4 concrete implementation steps for the fix. */
+  steps?: string[];
+  /** What must not change while fixing this. */
+  avoid?: string[];
+  /** Observable checks that prove the fix worked. */
+  acceptance?: string[];
+  /** Re-checks: id of the previous version's issue this one continues (still open or partly fixed). */
+  carriedFrom?: string | null;
+}
+
+export interface IssueLocator {
+  /**
+   * verified: tied to a detected element and confirmed on a close-up.
+   * unconfirmed: an element was picked but the close-up didn't confirm it.
+   * none: not tied to one visible element (e.g. the layout as a whole).
+   */
+  status: "verified" | "unconfirmed" | "none";
+  /** The element, in words ("Save button, top right of the form"). */
+  element: string;
+}
+
+/** Re-checks: the critique being re-checked, sent with the updated screenshot. */
+export interface PreviousCritique {
+  /** Single screens: the previous screenshot (data URL), shown to the model beside the new one. */
+  image?: string;
+  score: number;
+  issues: { id: string; title: string; severity: Severity; problem: string }[];
+}
+
+/** Re-checks: what happened to one issue from the previous version. */
+export interface IssueProgress {
+  previousId: string;
+  /** unseen: the issue's area isn't in the new screenshot (cropped out), so it can't be judged. */
+  status: "fixed" | "partly" | "open" | "unseen";
+  /** One short sentence on what changed (or didn't). */
+  note: string;
+}
+
+export interface IssueRegion {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface UXWin {
+  id: string;
+  title: string;
+  principle: string;
+  /** The learning catalog's key for `principle` (lib/learn.ts), or "other". */
+  principleKey?: string;
+  explanation: string;
 }
 
 export interface AnalysisResult {
   score: number;
+  /** Direct answer to the user's question (or "what to fix first"), 1–3 sentences. */
+  answer?: string;
   summary: string;
+  /** One sentence on how the model interpreted the AnalysisContext. */
+  contextSummary?: string;
   fixes: UXFix[];
+  wins: UXWin[];
+  /** One prompt covering every fix, for pasting into an AI coding tool in a single pass. */
+  consolidatedFixPrompt: string;
+  /** Re-checks only: the previous version's issues, each marked fixed / partly / open. */
+  progress?: IssueProgress[];
+}
+
+export interface AnalysisContext {
+  productType: string;
+  primaryUser: string;
+  primaryTask: string;
+  focusArea: string;
+  platform: "web" | "mobile" | "both";
+  stage: string;
 }
 
 export const TECH_STACKS = [
@@ -64,6 +148,8 @@ export const MOCK_RESULT: AnalysisResult = {
   <ArrowRight className="ml-2 h-4 w-4" />
 </button>`,
       language: "tsx",
+      fixPrompt:
+        "Make the primary 'Get Started' CTA the most prominent element on this screen. Increase its padding to px-8 py-4 with text-base font-semibold, give it a gradient fill using the brand accent, add a soft colored shadow (shadow-lg with the accent at ~30% opacity), and a subtle hover lift (-translate-y-0.5 plus a stronger shadow). Keep this treatment on this one button only — demote any competing buttons to secondary/ghost styles.",
     },
     {
       id: "2",
@@ -88,6 +174,8 @@ export const MOCK_RESULT: AnalysisResult = {
   <X className="h-5 w-5" />
 </button>`,
       language: "tsx",
+      fixPrompt:
+        "Every icon-only button on this screen has a hit area of about 32px, below the 44×44px minimum. Expand each one to h-11 w-11 (44px) using padding/fixed sizing while keeping the icon itself at h-5 w-5. Add an aria-label describing each button's action, plus a visible focus-visible ring. Don't change the icons' visual size.",
     },
     {
       id: "3",
@@ -114,6 +202,8 @@ export const MOCK_RESULT: AnalysisResult = {
   "
 />`,
       language: "tsx",
+      fixPrompt:
+        "Give every form input on this screen a clearly visible focus state for keyboard users (WCAG 2.4.7). On focus, remove the default outline and add a 2px accent-colored ring with a 2px offset matching the page background, plus a border color change to the same accent. Apply it consistently to all inputs, selects, and textareas.",
     },
     {
       id: "4",
@@ -132,6 +222,8 @@ export const MOCK_RESULT: AnalysisResult = {
   --text-tertiary: #71717A;  /* metadata only */
 }`,
       language: "css",
+      fixPrompt:
+        "Secondary body text (#71717A on #18181F) has a 3.8:1 contrast ratio, which fails WCAG AA. Change the secondary text color token to #A1A1AA (about 7.2:1) and apply it to all body and supporting copy. Keep #71717A only as a tertiary token for small metadata like timestamps. Update the token, not individual components.",
     },
     {
       id: "5",
@@ -161,6 +253,26 @@ export const MOCK_RESULT: AnalysisResult = {
   <ProjectList items={items} />
 )}`,
       language: "tsx",
+      fixPrompt:
+        "The project list currently only handles the success state. Add the three missing states: (1) while loading, show a skeleton list of 3 shimmering placeholder rows; (2) on error, show an error message with a 'Retry' button that refetches; (3) when the list is empty, show an empty state with an icon, the title 'No projects yet', a one-line description, and a 'New project' button. Render exactly one state at a time.",
     },
   ],
+  wins: [
+    {
+      id: "w1",
+      title: "Clear typographic hierarchy",
+      principle: "Visual Hierarchy",
+      explanation:
+        "Headings, subheadings, and body text use distinct, consistent sizes and weights, so users can scan the page and understand its structure at a glance.",
+    },
+    {
+      id: "w2",
+      title: "Consistent spacing rhythm",
+      principle: "Gestalt: Proximity",
+      explanation:
+        "Related elements are grouped tightly and sections are separated by generous, consistent gaps. That makes the layout feel organized and easy to parse.",
+    },
+  ],
+  consolidatedFixPrompt:
+    "Apply these UX fixes to this screen, in priority order:\n\n1. Primary CTA prominence: make 'Get Started' the dominant element (larger padding, accent gradient fill, soft colored shadow, subtle hover lift). Demote competing buttons to secondary/ghost.\n2. Touch targets: expand every icon-only button to a 44×44px hit area (h-11 w-11) without enlarging the icon. Add aria-labels and focus-visible rings.\n3. Input focus states: give all inputs/selects/textareas a 2px accent focus ring with a 2px offset and an accent border on focus.\n4. Text contrast: change the secondary text token from #71717A to #A1A1AA so body copy passes WCAG AA. Keep #71717A for small metadata only.\n5. Async states: add loading (skeleton rows), error (message + Retry), and empty (icon, title, description, 'New project' CTA) states to the project list.\n\nKeep the existing visual style and design tokens. Change only what's needed for these fixes.",
 };

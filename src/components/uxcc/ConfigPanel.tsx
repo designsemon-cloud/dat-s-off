@@ -25,7 +25,7 @@ export function ConfigPanel({ stack, device, onStackChange, onDeviceChange }: Co
     >
       {/* Tech Stack */}
       <div>
-        <div className="mb-2.5 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-text-tertiary">
+        <div className="mb-2.5 flex items-center gap-2 text-[14px] font-medium text-text-tertiary">
           <Code2 className="h-3.5 w-3.5" />
           Tech Stack
         </div>
@@ -34,9 +34,9 @@ export function ConfigPanel({ stack, device, onStackChange, onDeviceChange }: Co
             <button
               key={s.id}
               onClick={() => onStackChange(s.id)}
-              style={{ borderRadius: "4px" }}
+              style={{ borderRadius: "12px" }}
               className={cn(
-                "h-8 border px-3 text-[13px] font-medium transition-colors duration-150",
+                "h-8 border px-3 text-[14px] font-medium transition-colors duration-150",
                 stack === s.id
                   ? "border-border-strong bg-bg-elevated text-foreground"
                   : "border-border bg-bg-tertiary/60 text-muted-foreground hover:border-border-strong hover:bg-bg-elevated hover:text-foreground",
@@ -50,7 +50,7 @@ export function ConfigPanel({ stack, device, onStackChange, onDeviceChange }: Co
 
       {/* Target Device */}
       <div>
-        <div className="mb-2.5 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-text-tertiary">
+        <div className="mb-2.5 flex items-center gap-2 text-[14px] font-medium text-text-tertiary">
           <Monitor className="h-3.5 w-3.5" />
           Target Device
         </div>
@@ -61,7 +61,7 @@ export function ConfigPanel({ stack, device, onStackChange, onDeviceChange }: Co
               <button
                 key={d.id}
                 onClick={() => onDeviceChange(d.id)}
-                style={{ borderRadius: "4px" }}
+                style={{ borderRadius: "12px" }}
                 className={cn(
                   "flex flex-col items-center gap-1 border px-2 py-2 transition-colors duration-150",
                   device === d.id
@@ -79,7 +79,7 @@ export function ConfigPanel({ stack, device, onStackChange, onDeviceChange }: Co
 
       {/* Specifications — optional */}
       <div>
-        <div className="mb-2.5 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-text-tertiary">
+        <div className="mb-2.5 flex items-center gap-2 text-[14px] font-medium text-text-tertiary">
           <MessageSquare className="h-3.5 w-3.5" />
           Specifications
           <span className="ml-auto text-[10px] normal-case tracking-normal text-text-tertiary/50">
@@ -91,8 +91,8 @@ export function ConfigPanel({ stack, device, onStackChange, onDeviceChange }: Co
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Font size, accessibility requirements, focus areas…"
           rows={3}
-          style={{ borderRadius: "4px" }}
-          className="w-full resize-none border border-border bg-bg-tertiary/60 px-3 py-2 text-[13px] text-foreground placeholder:text-text-tertiary/60 focus:border-border-strong focus:outline-none transition-colors duration-150"
+          style={{ borderRadius: "12px" }}
+          className="w-full resize-none border border-border bg-bg-tertiary/60 px-3 py-2 text-[14px] text-foreground placeholder:text-text-tertiary/60 focus:border-border-strong focus:outline-none transition-colors duration-150"
         />
       </div>
     </motion.div>
