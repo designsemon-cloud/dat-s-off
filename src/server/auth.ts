@@ -86,8 +86,9 @@ class UpstashKV implements KVStore {
 
 /** The app's key-value store: Upstash Redis when configured, else memory. */
 export async function store(): Promise<KVStore> {
-  const url = process.env["UPSTASH_REDIS_REST_URL"];
-  const token = process.env["UPSTASH_REDIS_REST_TOKEN"];
+  // Upstash from the Vercel Marketplace names these KV_REST_API_*.
+  const url = process.env["UPSTASH_REDIS_REST_URL"] || process.env["KV_REST_API_URL"];
+  const token = process.env["UPSTASH_REDIS_REST_TOKEN"] || process.env["KV_REST_API_TOKEN"];
   if (url && token) {
     return new UpstashKV(new Redis({ url, token }));
   }
