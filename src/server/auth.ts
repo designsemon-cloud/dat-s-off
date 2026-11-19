@@ -84,7 +84,8 @@ class UpstashKV implements KVStore {
   }
 }
 
-async function store(): Promise<KVStore> {
+/** The app's key-value store: Upstash Redis when configured, else memory. */
+export async function store(): Promise<KVStore> {
   const url = process.env["UPSTASH_REDIS_REST_URL"];
   const token = process.env["UPSTASH_REDIS_REST_TOKEN"];
   if (url && token) {
@@ -205,70 +206,125 @@ export const signIn = createServerFn({ method: "POST" })
     };
   });
 
+// ─── Google sign-in ───────────────────────────────────────────────────────────
+//
+// Authorization-code flow in a popup (Google Identity Services
+// `initCodeClient`, ux_mode "popup"). The browser only ever holds a one-time
+// code; this server swaps it for tokens with the client secret, straight from
+// Google over TLS, then checks the ID token's claims before trusting it.
+// Setup: GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET (see .env.local), and the
+// site's origin under "Authorized JavaScript origins" on the OAuth client.
+
+const GOOGLE_ISSUERS = new Set(["accounts.google.com", "https://accounts.google.com"]);
+
+function googleCredentials() {
+  const clientId = process.env["GOOGLE_CLIENT_ID"] || process.env["VITE_GOOGLE_CLIENT_ID"] || "";
+  const clientSecret = process.env["GOOGLE_CLIENT_SECRET"] || "";
+  return clientId && clientSecret ? { clientId, clientSecret } : null;
+}
+
+type GoogleClaims = {
+  iss: string;
+  aud: string;
+  exp: number;
+  sub: string;
+  email?: string;
+  email_verified?: boolean | string;
+  name?: string;
+  picture?: string;
+};
+
+function decodeJwtPayload(jwt: string): GoogleClaims {
+  const part = jwt.split(".")[1];
+  if (!part) throw new Error("Google sign-in failed. Please try again.");
+  const b64 = part
+    .replace(/-/g, "+")
+    .replace(/_/g, "/")
+    .padEnd(Math.ceil(part.length / 4) * 4, "=");
+  const json = new TextDecoder().decode(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)));
+  return JSON.parse(json) as GoogleClaims;
+}
+
+/** Public: whether Google sign-in is set up, and the (public) client ID. */
+export const getGoogleAuthConfig = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ clientId: string | null }> => ({
+    clientId: googleCredentials()?.clientId ?? null,
+  }),
+);
+
 export const signInWithGoogle = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => d as { credential: string })
+  .inputValidator((d: unknown) => d as { code: string })
   .handler(async ({ data }): Promise<{ sessionToken: string; user: AuthUser }> => {
+    const creds = googleCredentials();
+    if (!creds) throw new Error("Google sign-in isn't set up yet.");
+    if (typeof data.code !== "string" || !data.code)
+      throw new Error("Google sign-in failed. Please try again.");
+
+    // 1. Exchange the one-time code. "postmessage" is the redirect URI GIS
+    //    uses for the popup flow.
+    const res = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        code: data.code,
+        client_id: creds.clientId,
+        client_secret: creds.clientSecret,
+        redirect_uri: "postmessage",
+        grant_type: "authorization_code",
+      }),
+    });
+    const tokens = (await res.json().catch(() => ({}))) as { id_token?: string };
+    if (!res.ok || !tokens.id_token) throw new Error("Google sign-in failed. Please try again.");
+
+    // 2. The ID token came from Google directly over TLS, so its claims can be
+    //    trusted once they're checked (OpenID Connect Core §3.1.3.7).
+    const claims = decodeJwtPayload(tokens.id_token);
+    const verified = claims.email_verified === true || claims.email_verified === "true";
+    if (
+      !GOOGLE_ISSUERS.has(claims.iss) ||
+      claims.aud !== creds.clientId ||
+      claims.exp * 1000 < Date.now() ||
+      !claims.sub ||
+      !claims.email
+    )
+      throw new Error("Google sign-in failed. Please try again.");
+    // Only a verified address may join an existing account with that email.
+    if (!verified) throw new Error("Please verify your Google account's email first.");
+
     const kv = await store();
+    const normalEmail = claims.email.toLowerCase();
+    let user: StoredUser | null = null;
 
-    // Decode Google JWT payload (add RS256 signature verification for production)
-    const parts = data.credential.split(".");
-    if (parts.length !== 3) throw new Error("Invalid Google credential.");
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"))) as {
-      sub: string;
-      email: string;
-      name?: string;
-      picture?: string;
-    };
-    if (!payload.sub || !payload.email) throw new Error("Invalid Google credential payload.");
-
-    const normalEmail = payload.email.toLowerCase();
-    let userId: string;
-
-    const existingByGoogle = await kv.get(`google:${payload.sub}`);
-    if (existingByGoogle) {
-      userId = existingByGoogle;
-      if (payload.picture) {
-        const raw = await kv.get(`user:${userId}`);
-        if (raw) {
-          const u = JSON.parse(raw) as StoredUser;
-          if (u.picture !== payload.picture) {
-            u.picture = payload.picture;
-            await kv.put(`user:${userId}`, JSON.stringify(u));
-          }
-        }
-      }
-    } else {
-      const existingByEmail = await kv.get(`email:${normalEmail}`);
-      if (existingByEmail) {
-        userId = existingByEmail;
-        const raw = await kv.get(`user:${userId}`);
-        if (raw) {
-          const u = JSON.parse(raw) as StoredUser;
-          u.googleId = payload.sub;
-          if (payload.picture) u.picture = payload.picture;
-          await kv.put(`user:${userId}`, JSON.stringify(u));
-        }
-        await kv.put(`google:${payload.sub}`, userId);
-      } else {
-        userId = crypto.randomUUID();
-        const user: StoredUser = {
-          id: userId,
-          email: normalEmail,
-          name: payload.name ?? normalEmail.split("@")[0],
-          googleId: payload.sub,
-          picture: payload.picture,
-          credits: FREE_CREDITS,
-          createdAt: new Date().toISOString(),
-        };
-        await kv.put(`user:${userId}`, JSON.stringify(user));
-        await kv.put(`email:${normalEmail}`, userId);
-        await kv.put(`google:${payload.sub}`, userId);
-      }
+    const byGoogle = await kv.get(`google:${claims.sub}`);
+    const linkedId = byGoogle ?? (await kv.get(`email:${normalEmail}`));
+    if (linkedId) {
+      const raw = await kv.get(`user:${linkedId}`);
+      if (raw) user = JSON.parse(raw) as StoredUser;
     }
 
-    const raw = await kv.get(`user:${userId}`);
-    if (!raw) throw new Error("Failed to load user.");
-    const user = JSON.parse(raw) as StoredUser;
+    if (user) {
+      // Returning user, or an email/password account signing in with Google
+      // for the first time: link it and refresh the picture.
+      const changed =
+        user.googleId !== claims.sub || (claims.picture && user.picture !== claims.picture);
+      user.googleId = claims.sub;
+      if (claims.picture) user.picture = claims.picture;
+      if (changed) await kv.put(`user:${user.id}`, JSON.stringify(user));
+      if (!byGoogle) await kv.put(`google:${claims.sub}`, user.id);
+    } else {
+      user = {
+        id: crypto.randomUUID(),
+        email: normalEmail,
+        name: claims.name ?? normalEmail.split("@")[0],
+        googleId: claims.sub,
+        picture: claims.picture,
+        credits: FREE_CREDITS,
+        createdAt: new Date().toISOString(),
+      };
+      await kv.put(`user:${user.id}`, JSON.stringify(user));
+      await kv.put(`email:${normalEmail}`, user.id);
+      await kv.put(`google:${claims.sub}`, user.id);
+    }
 
     const sessionToken = await createSession(kv, user);
     return {
@@ -323,8 +379,9 @@ export const signOut = createServerFn({ method: "POST" })
   });
 
 export const useCredit = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => d as { sessionToken: string })
+  .inputValidator((d: unknown) => d as { sessionToken: string; cost?: number })
   .handler(async ({ data }): Promise<{ remainingCredits: number }> => {
+    const cost = data.cost ?? 1;
     const kv = await store();
     const sessionRaw = await kv.get(`session:${data.sessionToken}`);
     if (!sessionRaw) throw new Error("Session not found. Please sign in again.");
@@ -334,9 +391,10 @@ export const useCredit = createServerFn({ method: "POST" })
     if (!userRaw) throw new Error("User not found.");
 
     const user = JSON.parse(userRaw) as StoredUser;
-    if (user.credits <= 0) throw new Error("No credits remaining. Please add more credits.");
+    if (user.credits < cost)
+      throw new Error(`Not enough credits. This analysis costs ${cost} credits.`);
 
-    user.credits -= 1;
+    user.credits -= cost;
     await kv.put(`user:${session.userId}`, JSON.stringify(user));
     return { remainingCredits: user.credits };
   });

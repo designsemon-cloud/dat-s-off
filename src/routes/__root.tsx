@@ -1,5 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { Toaster } from "sonner";
+import { AuthProvider } from "@/lib/auth-context";
+import { THEME_INIT_SCRIPT, useTheme } from "@/lib/theme";
 
 import appCss from "../styles.css?url";
 
@@ -30,13 +32,13 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "UXCC — AI UX Critic for Developers" },
+      { title: "Dats Off. — Design review for AI builders" },
       {
         name: "description",
         content:
-          "Upload a UI screenshot and get prioritized UX fixes with framework-specific code.",
+          "Drop a screenshot of what you built. See what's off, paste a fix prompt into your AI tool, and learn why.",
       },
-      { name: "author", content: "UXCC" },
+      { name: "author", content: "Dats Off." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
@@ -47,7 +49,7 @@ export const Route = createRootRoute({
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Forum&display=swap",
       },
     ],
   }),
@@ -58,8 +60,10 @@ export const Route = createRootRoute({
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Applies the saved theme before first paint (lib/theme.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
       <body>
@@ -71,10 +75,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const { theme } = useTheme();
   return (
-    <>
+    <AuthProvider>
       <Outlet />
-      <Toaster theme="dark" position="top-center" richColors />
-    </>
+      <Toaster theme={theme} position="top-center" />
+    </AuthProvider>
   );
 }

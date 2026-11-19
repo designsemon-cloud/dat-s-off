@@ -36,7 +36,7 @@ export function UploadZone({ onFile, preview, onClear }: UploadZoneProps) {
         </div>
         <div className="mt-3 flex items-center justify-between px-1">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <ImageIcon className="h-4 w-4 text-primary" />
+            <ImageIcon className="h-4 w-4 text-foreground" />
             <span className="truncate max-w-[200px]">{preview.name}</span>
           </div>
           {onClear && (
@@ -71,10 +71,10 @@ export function UploadZone({ onFile, preview, onClear }: UploadZoneProps) {
       className={cn(
         "group relative block cursor-pointer overflow-hidden rounded-2xl",
         "border border-dashed transition-all duration-300",
-        "bg-bg-tertiary/50 backdrop-blur",
+        "bg-bg-tertiary",
         dragging
-          ? "border-primary bg-primary/10 shadow-glow"
-          : "border-border-strong hover:border-primary/60 hover:bg-bg-tertiary",
+          ? "border-foreground bg-bg-elevated shadow-sm"
+          : "border-border-strong hover:border-text-tertiary hover:bg-bg-tertiary",
       )}
     >
       {/* Animated border glow on hover */}
@@ -103,7 +103,7 @@ export function UploadZone({ onFile, preview, onClear }: UploadZoneProps) {
       <div className="relative flex flex-col items-center justify-center px-6 py-12 text-center">
         <motion.div
           animate={dragging ? { y: -4, scale: 1.1 } : { y: 0, scale: 1 }}
-          className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-primary shadow-glow"
+          className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-primary shadow-sm"
         >
           <Upload className="h-6 w-6 text-white" strokeWidth={2.5} />
         </motion.div>

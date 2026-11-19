@@ -32,10 +32,10 @@ export function Header({
             <>
               <button
                 onClick={onNewAnalysis}
-                className="inline-flex h-8 items-center gap-1.5 border border-border bg-bg-tertiary/60 px-3 text-[13px] font-medium text-foreground hover:bg-bg-elevated transition-colors"
-                style={{ borderRadius: "4px" }}
+                className="inline-flex h-8 items-center gap-1.5 border border-border bg-bg-tertiary/60 px-3 text-[14px] font-medium text-foreground hover:bg-bg-elevated transition-colors"
+                style={{ borderRadius: "12px" }}
               >
-                <RotateCcw className="h-3.5 w-3.5 text-primary" />
+                <RotateCcw className="h-3.5 w-3.5" />
                 New Analysis
               </button>
               <span className="text-text-tertiary text-sm select-none">|</span>
@@ -43,17 +43,17 @@ export function Header({
           )}
 
           {/* Credits — no brackets, grey wallet icon */}
-          <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-foreground">
+          <span className="inline-flex items-center gap-1.5 text-[14px] font-medium text-foreground">
             <Wallet className="h-3.5 w-3.5 text-text-tertiary" />
             {remainingUses} credits left
           </span>
 
           <button
             onClick={onAddCredits}
-            className="inline-flex h-8 items-center gap-1.5 border border-border bg-bg-tertiary/60 px-3 text-[13px] font-medium text-foreground hover:bg-bg-elevated transition-colors"
-            style={{ borderRadius: "4px" }}
+            className="inline-flex h-8 items-center gap-1.5 border border-border bg-bg-tertiary/60 px-3 text-[14px] font-medium text-foreground hover:bg-bg-elevated transition-colors"
+            style={{ borderRadius: "12px" }}
           >
-            <Plus className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
+            <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
             Add credits
           </button>
 
@@ -68,7 +68,7 @@ export function Header({
                 />
               ) : (
                 <div
-                  className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-[11px] font-bold text-primary-foreground select-none"
+                  className="h-8 w-8 rounded-full bg-foreground flex items-center justify-center text-[12px] font-bold text-background select-none"
                   title={user.name || user.email}
                 >
                   {initials}
@@ -79,8 +79,8 @@ export function Header({
             /* No icon — just text */
             <button
               onClick={onSignIn}
-              className="inline-flex h-8 items-center bg-primary px-3 text-[13px] font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-              style={{ borderRadius: "4px" }}
+              className="inline-flex h-8 items-center bg-primary px-3 text-[14px] font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              style={{ borderRadius: "12px" }}
             >
               Sign in
             </button>

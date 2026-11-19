@@ -1,209 +1,240 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Eye, Code2, Smartphone } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import Lenis from "lenis";
+import "lenis/dist/lenis.css";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import { Header } from "@/components/uxcc/Header";
-import { GlowButton } from "@/components/uxcc/GlowButton";
-import { UploadZone } from "@/components/uxcc/UploadZone";
-import { ConfigPanel } from "@/components/uxcc/ConfigPanel";
-import { SampleAnalysis } from "@/components/uxcc/SampleAnalysis";
-import type { RecentAnalysisItem } from "@/components/uxcc/SampleAnalysis";
-import type { AuthUser } from "@/lib/auth-types";
+import { PromptComposer } from "@/components/uxcc/PromptComposer";
+import { Logo } from "@/components/uxcc/Logo";
+import { ThemeToggle } from "@/components/uxcc/ThemeToggle";
+import { HeroScene } from "@/components/landing/Scenery";
+import { TOOLS, ToolLogo, ToolStack } from "@/components/landing/ToolLogos";
+import { Showcase } from "@/components/landing/Showcase";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { Engine, WhatItCatches } from "@/components/landing/Capabilities";
+import { Learn } from "@/components/landing/Learn";
+import { WhyDatsOff } from "@/components/landing/WhyDatsOff";
+import { FAQ, FinalCTA, Footer, Pricing } from "@/components/landing/Closing";
+import { initLandingScrollFx } from "@/components/landing/scroll-fx";
+import { LiquidGlassDefs } from "@/components/landing/LiquidGlass";
+import { BeamChip } from "@/components/landing/BeamChip";
+import { BlurIn, COLUMN, Eyebrow, ShieldCheck, Tile } from "@/components/landing/primitives";
+import { CosmicButton } from "@/components/ui/cosmic-button";
+import { useAuth } from "@/lib/auth-context";
+import { useComposer } from "@/lib/use-composer";
+import { cn } from "@/lib/utils";
+import { TYPE } from "@/components/landing/type";
 
-interface LandingProps {
-  preview: { name: string; dataUrl: string } | null;
-  setPreview: (p: { name: string; dataUrl: string } | null) => void;
-  stack: string;
-  setStack: (s: string) => void;
-  device: string;
-  setDevice: (d: string) => void;
-  onAnalyze: () => void;
-  onViewSample: (imageDataUrl: string) => void;
-  onAddCredits: () => void;
-  remainingUses: number;
-  user: AuthUser | null;
-  onSignIn: () => void;
-  onSignOut: () => void;
-  recentAnalyses?: RecentAnalysisItem[];
-  onViewRecent?: (item: RecentAnalysisItem) => void;
+// Marketing landing page (see design-system/templates/landing-template.md).
+// Grey grain page, a full-bleed engraved hero scene with the title and
+// composer in its open sky, and sections in one narrow column. Lenis smooths
+// the scroll so the scroll-driven pieces (scene blur, scrubbed text, CTA
+// curtain) glide. The hero composer starts a real session and hands off to
+// /app/s/$id.
+
+const NAV_LINKS = [
+  { label: "Examples", href: "#examples" },
+  { label: "How it works", href: "#how-it-works" },
+  { label: "Resources", href: "#learn" },
+  { label: "Pricing", href: "#pricing" },
+  { label: "FAQ", href: "#faq" },
+];
+
+export function Landing() {
+  const { composerProps } = useComposer();
+  const { user, openAuth } = useAuth();
+  const reduce = useReducedMotion();
+  const [scrolled, setScrolled] = useState(false);
+
+  // Lenis drives the scroll from GSAP's ticker, so the GSAP scroll effects
+  // (scroll-fx.ts) and the smooth scroll read the same frame.
+  const pageRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const stopFx = pageRef.current ? initLandingScrollFx(pageRef.current) : () => {};
+    if (reduce) return stopFx;
+    const lenis = new Lenis({ autoRaf: false, anchors: { offset: -88 } });
+    lenis.on("scroll", ScrollTrigger.update);
+    const tick = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
+    return () => {
+      gsap.ticker.remove(tick);
+      gsap.ticker.lagSmoothing(500, 33);
+      lenis.destroy();
+      stopFx();
+    };
+  }, [reduce]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // As the hero scrolls away the scene blurs and sinks (HeroScene) while the
+  // copy lifts and fades a little faster.
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -60]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, reduce ? 1 : 0]);
+
+  return (
+    <div
+      id="top"
+      ref={pageRef}
+      className="bg-grain relative min-h-screen bg-background text-foreground"
+    >
+      <LiquidGlassDefs />
+      {/* Nav: logo on the left, a floating pill on the right. Both turn to
+          liquid glass once the page scrolls (.liquid-glass in styles.css). */}
+      <header className="fixed inset-x-0 top-0 z-40 px-3 pt-3 sm:px-5 sm:pt-4">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3">
+          <div
+            className={cn(
+              "rounded-lg px-3 py-1.5 transition-[background-color,box-shadow] duration-500",
+              scrolled && "liquid-glass",
+            )}
+          >
+            <Logo reload />
+          </div>
+          <nav
+            className={cn(
+              "relative flex items-center gap-1 rounded-lg border p-1 transition-[background-color,border-color,box-shadow] duration-500",
+              scrolled
+                ? "liquid-glass border-transparent"
+                : "border-border bg-bg-tertiary shadow-sm",
+            )}
+          >
+            {NAV_LINKS.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                className="hidden h-8 items-center rounded-md px-3 text-[14px] text-foreground transition-colors hover:bg-foreground/[0.06] md:inline-flex"
+              >
+                {l.label}
+              </a>
+            ))}
+            {!user && (
+              <button
+                onClick={openAuth}
+                className="hidden h-8 items-center rounded-md px-3 text-[14px] text-foreground transition-colors hover:bg-foreground/[0.06] sm:inline-flex"
+              >
+                Sign in
+              </button>
+            )}
+            <ThemeToggle className="rounded-md" />
+            <CosmicButton as="link" to="/app" size="sm">
+              Open app
+            </CosmicButton>
+          </nav>
+        </div>
+      </header>
+
+      {/* Hero — full-bleed engraved landscape; title and composer centered
+          in its open sky */}
+      {/* overflow-x-clip (not hidden): the blurred scene may drift below the
+          hero as it scrolls away instead of being cut off at its edge. */}
+      <section ref={heroRef} className="relative overflow-x-clip">
+        <HeroScene progress={scrollYProgress} />
+        <motion.div
+          style={{ y: contentY, opacity: contentOpacity }}
+          className="relative z-10 mx-auto flex min-h-[100svh] max-w-[720px] flex-col items-center px-5 pb-[max(21vw,190px)] pt-32 text-center sm:pt-36"
+        >
+          <motion.span
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex"
+          >
+            <BeamChip className="py-1 pl-1.5 pr-3 text-[14px] font-medium">
+              <ShieldCheck className="h-5 w-5" />5 free reviews, no sign-up
+            </BeamChip>
+          </motion.span>
+
+          <h1 className={cn(TYPE.hero, "mt-6")}>
+            <HeroWords text="The design review" />{" "}
+            <HeroWords text="your AI never did." delay={0.35} />
+          </h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.7, delay: 0.6 }}
+            className={cn(TYPE.lede, "mt-5 max-w-[540px]")}
+          >
+            Drop a screenshot of what you built. See what&rsquo;s off, why it matters, and get a
+            prompt to paste into <ToolStack className="ml-0.5" />
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.75 }}
+            className="mt-8 w-full text-left"
+          >
+            <PromptComposer {...composerProps} />
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Tools the fix prompts are written for */}
+      <section className="px-4 pt-20 sm:px-6">
+        <div className={COLUMN}>
+          <Eyebrow>Fix prompts written for</Eyebrow>
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+            {TOOLS.map((t, i) => (
+              <BlurIn key={t.name} delay={i * 0.07}>
+                <div data-fx="wave">
+                  <Tile className="h-20 sm:h-24">
+                    <span title={t.name}>
+                      <ToolLogo tool={t} />
+                    </span>
+                  </Tile>
+                </div>
+              </BlurIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Order (Nov 2026): why it's different, then what it catches, then the
+          product itself; learning before the engine; who it's for lives in
+          pricing. */}
+      <WhyDatsOff />
+      <WhatItCatches />
+      <Showcase />
+      <HowItWorks />
+      <Learn />
+      <Engine />
+      <Pricing />
+      <FAQ />
+      <FinalCTA />
+      <Footer />
+    </div>
+  );
 }
 
-export function Landing({
-  preview,
-  setPreview,
-  stack,
-  setStack,
-  device,
-  setDevice,
-  onAnalyze,
-  onViewSample,
-  onAddCredits,
-  remainingUses,
-  user,
-  onSignIn,
-  onSignOut,
-  recentAnalyses,
-  onViewRecent,
-}: LandingProps) {
+/** Headline words that rise out of a blur one after another on load. */
+function HeroWords({ text, delay = 0 }: { text: string; delay?: number }) {
+  const words = text.split(" ");
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.15 }}
-      className="relative flex min-h-screen flex-col"
-    >
-      <Header
-        remainingUses={remainingUses}
-        user={user}
-        onAddCredits={onAddCredits}
-        onSignIn={onSignIn}
-        onSignOut={onSignOut}
-      />
-
-      {/* Hero + tool */}
-      <main className="flex flex-1 items-center justify-center px-6 py-6">
-        <div
-          className={`w-full transition-[max-width] duration-500 ${preview ? "max-w-5xl" : "max-w-xl"}`}
+    <>
+      {words.map((w, i) => (
+        <motion.span
+          key={i}
+          initial={{ opacity: 0, y: 14, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.6, delay: delay + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+          className="gloss-heading inline-block"
         >
-          {/* Tag — hidden when configuring */}
-          {!preview && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.15 }}
-              className="mx-auto mb-4 inline-flex w-full justify-center"
-            >
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-bg-tertiary/60 px-3 py-1 text-[12px] font-medium text-muted-foreground">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
-                </span>
-                That doesn&rsquo;t look right—and here&rsquo;s why.
-                <ArrowRight className="h-3 w-3 text-text-tertiary" />
-              </span>
-            </motion.div>
-          )}
-
-          {/* Heading — switches when image is uploaded */}
-          {!preview ? (
-            <>
-              <motion.h1
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.2 }}
-                className="text-center text-[34px] font-medium leading-[1.1] tracking-tight text-foreground sm:text-[40px]"
-                style={{ letterSpacing: "-0.02em" }}
-              >
-                Catch UX issues <span className="text-primary">before your users do</span>
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.2, delay: 0.05 }}
-                className="mx-auto mt-3 max-w-md text-center text-[14px] leading-relaxed text-muted-foreground"
-              >
-                Upload a screen, get a senior-designer-grade critique with prioritized fixes and
-                code that drops straight into your stack.
-              </motion.p>
-            </>
-          ) : (
-            <motion.div
-              initial={{ y: 16, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="text-center mb-1"
-            >
-              <h2
-                className="text-[28px] font-medium leading-tight text-foreground"
-                style={{ letterSpacing: "-0.02em" }}
-              >
-                Configure Your <span className="text-primary">Analysis</span>
-              </h2>
-              <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
-                Select your tech stack and target device for precise, framework-specific code fixes
-              </p>
-            </motion.div>
-          )}
-
-          {/* Upload + Config (horizontal split when preview exists) */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.15 }}
-            className={`mt-6 grid gap-4 ${preview ? "lg:grid-cols-2" : "grid-cols-1"}`}
-          >
-            <UploadZone
-              preview={preview}
-              onFile={(file, dataUrl) => setPreview({ name: file.name, dataUrl })}
-              onClear={() => setPreview(null)}
-            />
-
-            <AnimatePresence>
-              {preview && (
-                <motion.div
-                  key="config"
-                  initial={{ opacity: 0, x: 16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 16 }}
-                  transition={{ duration: 0.3 }}
-                  className="rounded-xl border border-border bg-bg-tertiary/60 p-4 backdrop-blur"
-                >
-                  <ConfigPanel
-                    stack={stack}
-                    device={device}
-                    onStackChange={setStack}
-                    onDeviceChange={setDevice}
-                  />
-                  <div className="mt-4">
-                    <GlowButton size="md" onClick={onAnalyze} className="w-full">
-                      Analyze UX
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </GlowButton>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          {/* Trust line */}
-          {!preview && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] text-muted-foreground"
-            >
-              <span className="inline-flex items-center gap-1.5">
-                <Eye className="h-3.5 w-3.5 text-text-tertiary" />
-                Honest visual analysis
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Code2 className="h-3.5 w-3.5 text-text-tertiary" />
-                Production-ready code
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Smartphone className="h-3.5 w-3.5 text-text-tertiary" />
-                Tuned to your stack
-              </span>
-            </motion.div>
-          )}
-        </div>
-      </main>
-
-      {/* Sample analysis — only on screen 1, pinned to bottom */}
-      {!preview && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2, delay: 0.15 }}
-          className="flex-none mt-4 pb-10"
-        >
-          <SampleAnalysis
-            onViewSample={onViewSample}
-            recentAnalyses={recentAnalyses}
-            onViewRecent={onViewRecent}
-          />
-        </motion.div>
-      )}
-    </motion.div>
+          {w}
+          {i < words.length - 1 && " "}
+        </motion.span>
+      ))}
+    </>
   );
 }

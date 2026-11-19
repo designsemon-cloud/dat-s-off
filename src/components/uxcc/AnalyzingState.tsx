@@ -78,14 +78,14 @@ export function AnalyzingState({
               <div className="mt-3 space-y-1.5">
                 {stack && (
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-text-tertiary">Tech stack</span>
-                    <span className="text-[11px] font-medium text-foreground">{stack}</span>
+                    <span className="text-[12px] text-text-tertiary">Tech stack</span>
+                    <span className="text-[12px] font-medium text-foreground">{stack}</span>
                   </div>
                 )}
                 {device && (
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-text-tertiary">Device</span>
-                    <span className="text-[11px] font-medium text-foreground">{device}</span>
+                    <span className="text-[12px] text-text-tertiary">Device</span>
+                    <span className="text-[12px] font-medium text-foreground">{device}</span>
                   </div>
                 )}
               </div>
@@ -105,7 +105,7 @@ export function AnalyzingState({
                 return (
                   <div key={step.label} className="flex items-center gap-2.5">
                     {done ? (
-                      <span className="text-[10px] leading-none text-severity-low">✅</span>
+                      <span className="text-[10px] leading-none text-foreground">✅</span>
                     ) : (
                       <span
                         className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${
@@ -115,11 +115,7 @@ export function AnalyzingState({
                     )}
                     <span
                       className={`text-xs ${
-                        done
-                          ? "text-severity-low"
-                          : active
-                            ? "text-foreground"
-                            : "text-text-tertiary"
+                        done ? "text-foreground" : active ? "text-foreground" : "text-text-tertiary"
                       }`}
                     >
                       {step.label}

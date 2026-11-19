@@ -57,10 +57,11 @@ function AnalysisCard({
   return (
     <button
       onClick={onClick}
-      className="group flex overflow-hidden rounded-xl border border-border bg-bg-tertiary/60 text-left backdrop-blur transition-all hover:border-border-strong hover:bg-bg-elevated/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-bg-tertiary/60 text-left backdrop-blur transition-all hover:border-border-strong hover:bg-bg-elevated/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
-      {/* Screenshot */}
-      <div className="w-[36%] shrink-0 overflow-hidden bg-bg-secondary border-r border-border/50">
+      {/* Screenshot — fixed horizontal ratio so every sample fits the same
+          frame regardless of its source aspect ratio */}
+      <div className="aspect-[16/9] w-full shrink-0 overflow-hidden border-b border-border/50 bg-bg-secondary">
         <img
           src={imageUrl}
           alt={title}
@@ -72,15 +73,15 @@ function AnalysisCard({
       {/* Content */}
       <div className="flex flex-1 flex-col gap-2 p-3.5">
         <div>
-          <p className="text-[13px] font-semibold leading-snug text-foreground">{title}</p>
-          <p className="mt-0.5 text-[11px] text-text-tertiary">{subtitle}</p>
+          <p className="text-[14px] font-semibold leading-snug text-foreground">{title}</p>
+          <p className="mt-0.5 text-[12px] text-text-tertiary">{subtitle}</p>
         </div>
 
         <div className="flex flex-col gap-1.5 my-1">
           {issues.map((issue, i) => (
             <div key={i} className="flex items-start gap-1.5">
-              <span className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-primary/60" />
-              <span className="text-[11px] leading-tight text-muted-foreground line-clamp-2">
+              <span className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-text-tertiary" />
+              <span className="text-[12px] leading-tight text-muted-foreground line-clamp-2">
                 {issue.text}
               </span>
             </div>
@@ -98,7 +99,7 @@ function AnalysisCard({
           ))}
         </div>
 
-        <div className="mt-auto pt-1 flex items-center gap-1 text-[11px] font-medium text-primary transition-opacity group-hover:opacity-70">
+        <div className="mt-auto pt-1 flex items-center gap-1 text-[12px] font-semibold text-foreground transition-opacity group-hover:opacity-70">
           View analysis
           <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
         </div>
