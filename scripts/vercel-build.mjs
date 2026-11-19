@@ -84,7 +84,7 @@ writeFileSync(
   ".vercel/output/functions/_s.func/.vc-config.json",
   JSON.stringify(
     {
-      runtime: "nodejs20.x",
+      runtime: "nodejs24.x",
       handler: "vc-handler.mjs",
       launcherType: "Nodejs",
       supportsResponseStreaming: true,
