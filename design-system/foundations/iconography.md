@@ -46,9 +46,11 @@ Default Lucide stroke (2) almost everywhere. `strokeWidth={2.5}` is used deliber
 
 ## Favicon (Nov 2026)
 
-The browser-tab icon is the **"D." mark** from the chat's assistant avatar (`Assistant` in `ChatPane.tsx`): a bold "D." on a rounded grey tile with a 1px border.
+The browser-tab icon is the **"D." mark** from the chat's assistant avatar (`Assistant` in `ChatPane.tsx`), dressed like the **primary button** (`CosmicButton`): a raised neutral surface inside the orange ring, so the tab carries the one orange accent.
 
-- `public/favicon.svg` is the main icon. It follows the system theme: a light tile (`#f3f3f5`, border `#d8dbdf`, mark `#1e2022`) in light mode and a dark tile (`#26282c`, border `#2e3035`, mark `#f3f3f5`) in dark mode.
-- Fallbacks: `favicon-32.png` and `favicon.ico` (light). `apple-touch-icon.png` is 180px, full-bleed and opaque, because iOS fills a transparent icon with black.
+- `public/favicon.svg` is the main icon.
+  - **Ring:** the `.cosmic-border` gradient, frozen (`#ea580c → #ec631b → #f39256 → #ec631b → #ea580c`), 6/64 wide so it still reads at 16px.
+  - **Surface:** follows the system theme, `#ffffff → #f3f3f5` with a dark mark (`#1e2022`) in light mode, and `#26282c → #1c1d20` with a light mark (`#f3f3f5`) in dark mode. A faint top sheen echoes the button's inset highlight.
+- **Fallbacks:** `favicon-32.png` and `favicon.ico` (light). `apple-touch-icon.png` is 180px, full-bleed and opaque, because iOS rounds the corners itself and fills transparency with black.
 - The links are in the root route's `head` (`src/routes/__root.tsx`).
-- If the avatar's look changes, update the SVG and re-render the PNG and ICO fallbacks from it.
+- If the button ring or the avatar changes, update the SVG and re-render the PNG and ICO fallbacks from it.
