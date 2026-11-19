@@ -101,7 +101,7 @@ function cluster(boxes: PxBox[], W: number, H: number) {
   const gapY = Math.max(0.03 * H, 1.5 * Math.max(...boxes.map((b) => b.h)));
   const rest = boxes.slice(1);
   const group = [boxes[0]];
-  for (let added = true; added; ) {
+  for (let added = true; added;) {
     added = false;
     const x0 = Math.min(...group.map((b) => b.x));
     const y0 = Math.min(...group.map((b) => b.y));
