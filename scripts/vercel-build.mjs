@@ -79,6 +79,13 @@ export default async function handler(req, res) {
 `.trimStart(),
 );
 
+// Mark the bundle as ES modules. Without a package.json here, Node has to
+// guess the format of server.js, and the Vercel runtime may not guess ESM.
+writeFileSync(
+  ".vercel/output/functions/_s.func/package.json",
+  JSON.stringify({ type: "module" }, null, 2),
+);
+
 // Vercel function config
 writeFileSync(
   ".vercel/output/functions/_s.func/.vc-config.json",
