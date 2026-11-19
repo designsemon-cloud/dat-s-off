@@ -43,3 +43,12 @@ There are two related but distinct scales: the icon's own size, and — when an 
 ## Stroke width
 
 Default Lucide stroke (2) almost everywhere. `strokeWidth={2.5}` is used deliberately for a couple of higher-emphasis icons (the `Upload` hero icon, the `Plus` in "Add credits") — a slightly bolder stroke for icons that are meant to read as more prominent/actionable. Don't apply `2.5` blanket-wide; reserve it the same way.
+
+## Favicon (Nov 2026)
+
+The browser-tab icon is the **"D." mark** from the chat's assistant avatar (`Assistant` in `ChatPane.tsx`): a bold "D." on a rounded grey tile with a 1px border.
+
+- `public/favicon.svg` is the main icon. It follows the system theme: a light tile (`#f3f3f5`, border `#d8dbdf`, mark `#1e2022`) in light mode and a dark tile (`#26282c`, border `#2e3035`, mark `#f3f3f5`) in dark mode.
+- Fallbacks: `favicon-32.png` and `favicon.ico` (light). `apple-touch-icon.png` is 180px, full-bleed and opaque, because iOS fills a transparent icon with black.
+- The links are in the root route's `head` (`src/routes/__root.tsx`).
+- If the avatar's look changes, update the SVG and re-render the PNG and ICO fallbacks from it.
